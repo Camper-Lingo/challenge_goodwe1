@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+@theme {
+  --color-electric-blue: #1E90FF;
+  --color-electric-blue-dark: #1570CD;
+  --color-charge-green: #00D084;
+  --color-charge-green-dark: #00A669;
+  --color-dark: #1A1A1A;
+  --color-dark-surface: #242424;
+  --color-dark-card: #2E2E2E;
+  --color-dark-border: #3A3A3A;
+  --color-warning: #FF6B35;
+  --color-warning-dark: #E05520;
+  --color-text-primary: #F5F5F5;
+  --color-text-secondary: #A0A0A0;
+  --color-text-muted: #6A6A6A;
+
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-mono: 'IBM Plex Mono', monospace;
+
+  --animate-pulse-bolt: pulse-bolt 1.5s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-in: fade-in 0.4s ease-out;
+  --animate-fill-ring: fill-ring 0.6s ease-out forwards;
+  --animate-shimmer: shimmer 1.5s infinite;
+
+  @keyframes pulse-bolt {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+  }
+  @keyframes slide-in {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #1A1A1A;
+  color: #F5F5F5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #242424;
+}
+::-webkit-scrollbar-thumb {
+  background: #3A3A3A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4A4A4A;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #3A3A3A;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1E90FF;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
+  transition: box-shadow 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 6px rgba(30, 144, 255, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1E90FF;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
+}
+
+/* Mono number style */
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Glow effects */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+}
+
+.glow-green {
+  box-shadow: 0 0 20px rgba(0, 208, 132, 0.3);
+}
+
+.text-glow-blue {
+  text-shadow: 0 0 20px rgba(30, 144, 255, 0.5);
+}
