@@ -1,32 +1,44 @@
-# React + TypeScript + Vite
+# ⚡ Painel de Carregamento
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Interface web para gerenciamento e acompanhamento de sessões de carregamento de veículos elétricos.
 
-Currently, two official plugins are available:
+## 📌 Sobre o projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Este projeto consiste em um painel de carregamento desenvolvido para simular e gerenciar sessões de carregamento de veículos elétricos.
 
-## React Compiler
+A aplicação permite selecionar uma sessão de carregamento, acompanhar o progresso, visualizar informações da carga e consultar o histórico de carregamentos.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Tecnologias
 
-## Expanding the Oxlint configuration
+- React
+- TypeScript
+- Vite
+- CSS
+- LocalStorage
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## ✨ Funcionalidades
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+- 📊 Dashboard de carregamento
+- ⚡ Seleção de sessão de carregamento
+- 🔋 Acompanhamento do progresso
+- 📋 Confirmação de carregamento
+- 🕒 Histórico de sessões
+- 💾 Persistência de dados utilizando LocalStorage
+- 🔔 Sistema de notificações (Toast)
+- 📱 Interface responsiva
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 📂 Estrutura do projeto
+
+```text
+src/
+├── components/
+│   ├── Common/
+│   ├── Layout/
+│   └── Screens/
+├── hooks/
+├── services/
+├── types/
+├── utils/
+├── App.tsx
+├── App.css
+└── main.tsx
