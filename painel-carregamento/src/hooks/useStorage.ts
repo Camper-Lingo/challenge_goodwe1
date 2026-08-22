@@ -1,28 +1,41 @@
-// src/hooks/useStorage.ts
-
 import { useState, useCallback } from 'react';
+
 import type { Car, ChargeSession, User } from '../types';
+
 import { storageService } from '../services/storageService';
 
 export const useStorage = () => {
-  const [car, setCarState] = useState<Car | null>(() => storageService.getCar());
-  const [user] = useState<User | null>(() => storageService.getUser());
-  const [history, setHistory] = useState<ChargeSession[]>(() => storageService.getHistory());
-  const [currentSession, setCurrentSessionState] = useState<ChargeSession | null>(
-    () => storageService.getCurrentSession()
+  const [car, setCarState] = useState<Car | null>(null);
+
+  const [user, setUserState] = useState<User | null>(null);
+
+  const [history, setHistory] = useState<ChargeSession[]>(
+    () => storageService.getHistory()
   );
 
+  const [currentSession, setCurrentSessionState] =
+    useState<ChargeSession | null>(null);
+
   const saveCar = useCallback((newCar: Car) => {
-    storageService.setCar(newCar);
     setCarState(newCar);
+  }, []);
+
+  const saveUser = useCallback((newUser: User) => {
+    setUserState(newUser);
+  }, []);
+
+  const clearUser = useCallback(() => {
+    setUserState(null);
   }, []);
 
   const updateCarCharge = useCallback((newCharge: number) => {
     setCarState((prev) => {
       if (!prev) return prev;
-      const updated = { ...prev, currentCharge: Math.round(newCharge) };
-      storageService.setCar(updated);
-      return updated;
+
+      return {
+        ...prev,
+        currentCharge: Math.round(newCharge),
+      };
     });
   }, []);
 
@@ -32,20 +45,22 @@ export const useStorage = () => {
   }, []);
 
   const startSession = useCallback((session: ChargeSession) => {
-    storageService.setCurrentSession(session);
     setCurrentSessionState(session);
   }, []);
 
-  const updateSession = useCallback((updatedSession: ChargeSession) => {
-    storageService.setCurrentSession(updatedSession);
-    setCurrentSessionState(updatedSession);
-  }, []);
+  const updateSession = useCallback(
+    (updatedSession: ChargeSession) => {
+      setCurrentSessionState(updatedSession);
+    },
+    []
+  );
 
   const endSession = useCallback(
     (finalSession: ChargeSession) => {
       storageService.addChargeToHistory(finalSession);
-      storageService.clearCurrentSession();
+
       setCurrentSessionState(null);
+
       setHistory(storageService.getHistory());
     },
     []
@@ -66,6 +81,8 @@ export const useStorage = () => {
     history,
     currentSession,
     saveCar,
+    saveUser,
+    clearUser,
     updateCarCharge,
     saveCharge,
     startSession,

@@ -3,6 +3,7 @@
 export interface Car {
   id: string;
   model: string;
+  licensePlate: string;
   batteryCapacity: number; // kWh
   currentCharge: number; // %
   maxPower: number; // kW
@@ -23,6 +24,7 @@ export interface ChargeSession {
   timestamp: string;
   carId: string;
   carModel: string;
+  licensePlate: string;
   startBattery: number; // %
   endBattery: number; // %
   energyUsed: number; // kWh

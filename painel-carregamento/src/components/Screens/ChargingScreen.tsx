@@ -52,6 +52,7 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionRef = useRef(session);
   const pausedRef = useRef(false);
+  const finishedRef = useRef(false); // guard: finishSession fires only once
   pausedRef.current = paused;
 
   const targetBattery = session.endBattery;
@@ -65,18 +66,20 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
 
   const finishSession = useCallback(
     (finalBattery: number, finalEnergy: number, elapsed: number) => {
+      if (finishedRef.current) return; // already completed, skip
+      finishedRef.current = true;
       if (intervalRef.current) clearInterval(intervalRef.current);
       const costSoFar = finalEnergy * session.costPerKwh;
-      const finalSession: ChargeSession = {
+      const finalSess: ChargeSession = {
         ...sessionRef.current,
         endBattery: Math.round(finalBattery),
         energyUsed: Math.round(finalEnergy * 10) / 10,
         totalCost: Math.round(costSoFar * 100) / 100,
-        duration: Math.round(elapsed / 60),
+        duration: Math.max(1, Math.round(elapsed / 60)),
         status: 'completed',
       };
       onCarChargeUpdate(Math.round(finalBattery));
-      onStop(finalSession);
+      onStop(finalSess);
     },
     [session.costPerKwh, onCarChargeUpdate, onStop]
   );
@@ -95,20 +98,25 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
 
       // Simulate charging: increase battery by ~0.4-0.7% per second
       setCurrentBattery((prev) => {
+        if (finishedRef.current) return prev;
         const increment = 0.4 + Math.random() * 0.3;
         const next = Math.min(targetBattery, prev + increment);
         onCarChargeUpdate(next);
-        if (next >= targetBattery) {
-          // Complete
+        return next;
+      });
+
+      // Check completion outside setState to avoid double-firing
+      setCurrentBattery((prev) => {
+        if (!finishedRef.current && prev >= targetBattery) {
           setEnergyDelivered((e) => {
             setElapsedSeconds((s) => {
-              finishSession(next, e, s + 1);
-              return s + 1;
+              finishSession(prev, e, s);
+              return s;
             });
             return e;
           });
         }
-        return next;
+        return prev;
       });
 
       // Simulate energy delivery

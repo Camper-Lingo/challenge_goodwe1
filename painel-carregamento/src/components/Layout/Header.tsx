@@ -1,19 +1,21 @@
 // src/components/Layout/Header.tsx
 
 import React from 'react';
-import { Zap, Settings, History, LayoutDashboard } from 'lucide-react';
+import {Settings, History, LayoutDashboard } from 'lucide-react';
 import type { Screen } from '../../types';
 
 interface HeaderProps {
   currentScreen: Screen;
   onNavigate: (screen: Screen) => void;
   stationId?: string;
+  userName?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentScreen,
   onNavigate,
   stationId = 'SP-001',
+  userName,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#1A1A1A]/90 backdrop-blur-md border-b border-[#3A3A3A]">
@@ -24,12 +26,21 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-2 group"
           id="logo-btn"
         >
-          <div className="w-9 h-9 bg-[#1E90FF] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-shadow">
-            <Zap size={20} className="text-white" fill="white" />
+          <div className="w-9 h-9 flex items-center justify-center">
+            <img
+              src="/logo_goodwe.png"
+              alt="GoodWe"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div className="hidden sm:block">
             <div className="font-bold text-[#F5F5F5] text-sm leading-tight">EV Station</div>
             <div className="text-[#A0A0A0] text-xs">Estação {stationId}</div>
+            {userName && (
+              <div className="text-[#00D084] text-xs font-medium mt-0.5">
+                Bem-vindo, {userName}! 👋
+              </div>
+            )}
           </div>
         </button>
 

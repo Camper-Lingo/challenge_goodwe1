@@ -7,18 +7,63 @@ import { SelectChargeScreen } from './components/Screens/SelectChargeScreen';
 import { ConfirmScreen } from './components/Screens/ConfirmScreen';
 import { ChargingScreen } from './components/Screens/ChargingScreen';
 import { HistoryScreen } from './components/Screens/HistoryScreen';
+import { SplashScreen } from './components/Screens/SplashScreen';
+import { WelcomeScreen } from './components/Screens/WelcomeScreen';
 import { ToastContainer } from './components/Common/Toast';
 import { useStorage } from './hooks/useStorage';
 import type { Screen, ChargeCalculation, ChargeSession, Tariff, ToastData, Car } from './types';
 
-const MOCK_CAR: Car = {
-  id: 'car_001',
-  model: 'Tesla Model 3',
-  batteryCapacity: 60,
-  currentCharge: 32,
-  maxPower: 100,
-  temperature: 28,
-};
+function generateRandomPlate(): string {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  const randomLetters = Array.from(
+    { length: 3 },
+    () => letters[Math.floor(Math.random() * letters.length)]
+  ).join('');
+
+  const randomNumbers = Math.floor(1000 + Math.random() * 9000);
+
+  return `${randomLetters}-${randomNumbers}`;
+}
+
+function generateRandomCar(): Car {
+  const cars = [
+    {
+      model: 'Tesla Model 3',
+      batteryCapacity: 60,
+      maxPower: 100,
+    },
+    {
+      model: 'BYD Dolphin',
+      batteryCapacity: 44.9,
+      maxPower: 60,
+    },
+    {
+      model: 'GWM Ora 03',
+      batteryCapacity: 48,
+      maxPower: 67,
+    },
+    {
+      model: 'Volvo EX30',
+      batteryCapacity: 69,
+      maxPower: 153,
+    },
+  ];
+
+  const selectedCar = cars[Math.floor(Math.random() * cars.length)];
+
+  const currentCharge = Math.floor(Math.random() * 81) + 10;
+
+  return {
+    id: `car_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    model: selectedCar.model,
+    licensePlate: generateRandomPlate(),
+    batteryCapacity: selectedCar.batteryCapacity,
+    currentCharge,
+    maxPower: selectedCar.maxPower,
+    temperature: Math.floor(Math.random() * 11) + 23,
+  };
+}
 
 const DEFAULT_TARIFF: Tariff = {
   currentRate: 0.80,
@@ -28,64 +73,6 @@ const DEFAULT_TARIFF: Tariff = {
   lastUpdated: new Date().toISOString(),
 };
 
-const MOCK_HISTORY: ChargeSession[] = [
-  {
-    id: 'hist_001',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    carId: 'car_001',
-    carModel: 'Tesla Model 3',
-    startBattery: 10,
-    endBattery: 80,
-    energyUsed: 42.0,
-    costPerKwh: 0.80,
-    totalCost: 33.60,
-    duration: 25,
-    status: 'completed',
-    stationId: 'SP-001',
-  },
-  {
-    id: 'hist_002',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    carId: 'car_001',
-    carModel: 'Tesla Model 3',
-    startBattery: 45,
-    endBattery: 90,
-    energyUsed: 28.4,
-    costPerKwh: 0.80,
-    totalCost: 22.72,
-    duration: 17,
-    status: 'completed',
-    stationId: 'SP-001',
-  },
-  {
-    id: 'hist_003',
-    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    carId: 'car_001',
-    carModel: 'Tesla Model 3',
-    startBattery: 20,
-    endBattery: 50,
-    energyUsed: 18.9,
-    costPerKwh: 0.80,
-    totalCost: 15.12,
-    duration: 11,
-    status: 'completed',
-    stationId: 'SP-001',
-  },
-  {
-    id: 'hist_004',
-    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    carId: 'car_001',
-    carModel: 'Tesla Model 3',
-    startBattery: 60,
-    endBattery: 70,
-    energyUsed: 6.3,
-    costPerKwh: 0.80,
-    totalCost: 5.04,
-    duration: 4,
-    status: 'cancelled',
-    stationId: 'SP-001',
-  },
-];
 
 function generateId() {
   return `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -94,16 +81,20 @@ function generateId() {
 function App() {
   const {
     car,
+    user,
     history,
     currentSession,
     saveCar,
+    saveUser,
     updateCarCharge,
     startSession,
     endSession,
     clearAllHistory,
-    saveCharge,
   } = useStorage();
 
+  // 'splash' | 'welcome' são fases de onboarding; depois disso usa `screen`
+  type AppPhase = 'splash' | 'welcome' | 'app';
+  const [appPhase, setAppPhase] = useState<AppPhase>('splash');
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [chargeTarget, setChargeTarget] = useState(80);
   const [chargeCalc, setChargeCalc] = useState<ChargeCalculation | null>(null);
@@ -112,15 +103,9 @@ function App() {
 
   // Initialize mock data if needed
   useEffect(() => {
-    if (!car) {
-      saveCar(MOCK_CAR);
-    }
-    // Seed history if empty
-    const stored = localStorage.getItem('ev_history');
-    const existing = stored ? JSON.parse(stored) : [];
-    if (existing.length === 0) {
-      MOCK_HISTORY.forEach((s) => saveCharge(s));
-    }
+    const newCar = generateRandomCar();
+
+    saveCar(newCar);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Resume active session if app reloads mid-charge
@@ -130,6 +115,22 @@ function App() {
       setScreen('charging');
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Splash complete → ir para Welcome (novo user) ou Dashboard (user existente)
+  const handleSplashComplete = useCallback(() => {
+    setAppPhase('welcome');
+  }, []);
+
+  // Welcome: salvar nome e ir para o app
+  const handleNameSubmit = useCallback((name: string) => {
+    saveUser({
+      id: `user_${Date.now()}`,
+      name,
+      email: '',
+      createdAt: new Date().toISOString(),
+    });
+    setAppPhase('app');
+  }, [saveUser]);
 
   const addToast = useCallback((message: string, type: ToastData['type'] = 'info') => {
     const id = generateId();
@@ -143,7 +144,9 @@ function App() {
   // ── Screen handlers ────────────────────────────────────────────────
 
   const handleConnectCar = useCallback(() => {
-    saveCar(MOCK_CAR);
+    const newCar = generateRandomCar();
+
+    saveCar(newCar);
     addToast('Veículo conectado com sucesso!', 'success');
   }, [saveCar, addToast]);
 
@@ -168,6 +171,7 @@ function App() {
       timestamp: new Date().toISOString(),
       carId: car.id,
       carModel: car.model,
+      licensePlate: car.licensePlate,
       startBattery: car.currentCharge,
       endBattery: chargeTarget,
       energyUsed: chargeCalc.energyNeeded,
@@ -226,12 +230,22 @@ function App() {
     [screen, activeSession, addToast]
   );
 
+  // ── ONBOARDING PHASES ─────────────────────────────────────────────
+  if (appPhase === 'splash') {
+    return <SplashScreen onLoadingComplete={handleSplashComplete} duration={3500} />;
+  }
+  if (appPhase === 'welcome') {
+    return <WelcomeScreen onNameSubmit={handleNameSubmit} />;
+  }
+
+  // ── MAIN APP ──────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#1A1A1A]">
       <Header
         currentScreen={screen}
         onNavigate={handleNavigate}
         stationId="SP-001"
+        userName={user?.name}
       />
 
       <main className="max-w-lg mx-auto px-4 py-6">
