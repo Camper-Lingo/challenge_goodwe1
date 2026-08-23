@@ -61,7 +61,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </span>
             </div>
             <h2 className="text-xl font-bold text-[#F5F5F5]">{car.model}</h2>
-            <p className="text-[#A0A0A0] text-sm">ID: {car.id}</p>
+            <p className="text-[#A0A0A0] text-sm">
+              Placa: {car.licensePlate}
+            </p>
           </div>
           <div className="flex flex-col items-center">
             <CircularProgress

@@ -5,11 +5,12 @@ import { User, Zap } from 'lucide-react';
 import { Button } from '../Common/Button';
 
 interface WelcomeScreenProps {
-  onNameSubmit: (name: string) => void;
+  onNameSubmit: (name: string, surname: string) => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNameSubmit }) => {
   const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +26,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNameSubmit }) =>
 
     setIsLoading(true);
     setTimeout(() => {
-      onNameSubmit(name.trim());
+      onNameSubmit(name.trim(), surname.trim());
     }, 500);
   };
 
@@ -111,6 +112,42 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNameSubmit }) =>
                 <span className="text-xs text-[#6A6A6A]">Digite seu nome para continuar</span>
                 <span className={`text-xs font-semibold ${name.length > 0 ? 'text-[#00D084]' : 'text-[#6A6A6A]'}`}>
                   {name.length}/40
+                </span>
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="user-surname"
+                className="block text-sm text-[#A0A0A0] mb-2 font-medium"
+              >
+                Seu sobrenome
+              </label>
+
+              <div className="flex items-center bg-[#242424] rounded-xl border-2 border-[#3A3A3A] focus-within:border-[#1E90FF] px-4 py-3 transition-colors duration-200">
+                <User
+                  size={18}
+                  className="text-[#6A6A6A] mr-3 flex-shrink-0"
+                />
+
+                <input
+                  id="user-surname"
+                  type="text"
+                  value={surname}
+                  onChange={(e) => setSurname(e.target.value)}
+                  placeholder="Digite seu sobrenome..."
+                  disabled={isLoading}
+                  maxLength={40}
+                  className="flex-1 bg-transparent text-[#F5F5F5] text-lg font-medium outline-none placeholder-[#4A4A4A] disabled:opacity-50"
+                />
+
+                {surname && (
+                  <span className="text-[#00D084] text-lg ml-2">✓</span>
+                )}
+              </div>
+
+              <div className="flex justify-end mt-1.5">
+                <span className="text-xs text-[#6A6A6A]">
+                  {surname.length}/40
                 </span>
               </div>
             </div>

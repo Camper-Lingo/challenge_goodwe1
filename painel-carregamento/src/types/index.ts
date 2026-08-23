@@ -38,6 +38,7 @@ export interface ChargeSession {
 export interface User {
   id: string;
   name: string;
+  surname: string;
   email: string;
   createdAt: string;
 }

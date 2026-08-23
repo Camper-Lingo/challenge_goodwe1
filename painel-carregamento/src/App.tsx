@@ -11,7 +11,7 @@ import { SplashScreen } from './components/Screens/SplashScreen';
 import { WelcomeScreen } from './components/Screens/WelcomeScreen';
 import { ToastContainer } from './components/Common/Toast';
 import { useStorage } from './hooks/useStorage';
-import type { Screen, ChargeCalculation, ChargeSession, Tariff, ToastData, Car } from './types';
+import type { Screen, ChargeCalculation, ChargeSession, Tariff, ToastData, Car} from './types';
 
 function generateRandomPlate(): string {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -64,6 +64,11 @@ function generateRandomCar(): Car {
     temperature: Math.floor(Math.random() * 11) + 23,
   };
 }
+function generateRandomStation(): string {
+  const stations = ['SP-001', 'SP-002', 'SP-003', 'SP-004'];
+
+  return stations[Math.floor(Math.random() * stations.length)];
+}
 
 const DEFAULT_TARIFF: Tariff = {
   currentRate: 0.80,
@@ -100,37 +105,43 @@ function App() {
   const [chargeCalc, setChargeCalc] = useState<ChargeCalculation | null>(null);
   const [activeSession, setActiveSession] = useState<ChargeSession | null>(currentSession);
   const [toasts, setToasts] = useState<ToastData[]>([]);
+  const [stationId] = useState(generateRandomStation);
 
   // Initialize mock data if needed
   useEffect(() => {
-    const newCar = generateRandomCar();
+  // Cada carregamento da página representa um novo cliente
+  localStorage.removeItem('ev_user');
+  localStorage.removeItem('ev_current_session');
 
-    saveCar(newCar);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Gera um novo carro para esse cliente
+  const newCar = generateRandomCar();
+  saveCar(newCar);
 
-  // Resume active session if app reloads mid-charge
-  useEffect(() => {
-    if (currentSession && currentSession.status === 'charging') {
-      setActiveSession(currentSession);
-      setScreen('charging');
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Começa sem sessão ativa
+  setActiveSession(null);
+}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   // Splash complete → ir para Welcome (novo user) ou Dashboard (user existente)
   const handleSplashComplete = useCallback(() => {
     setAppPhase('welcome');
   }, []);
 
-  // Welcome: salvar nome e ir para o app
-  const handleNameSubmit = useCallback((name: string) => {
+// Welcome: salvar nome e ir para o app
+const handleNameSubmit = useCallback(
+  (name: string, surname: string) => {
     saveUser({
       id: `user_${Date.now()}`,
       name,
+      surname,
       email: '',
       createdAt: new Date().toISOString(),
     });
+
     setAppPhase('app');
-  }, [saveUser]);
+  },
+  [saveUser]
+);
 
   const addToast = useCallback((message: string, type: ToastData['type'] = 'info') => {
     const id = generateId();
@@ -179,14 +190,14 @@ function App() {
       totalCost: chargeCalc.totalCostRaw,
       duration: chargeCalc.estimatedTime,
       status: 'charging',
-      stationId: 'SP-001',
+      stationId,
     };
 
     startSession(session);
     setActiveSession(session);
     setScreen('charging');
     addToast('Carregamento iniciado!', 'success');
-  }, [car, chargeCalc, chargeTarget, startSession, addToast]);
+  }, [car, chargeCalc, chargeTarget, startSession, addToast, stationId]);
 
   const handleChargingPause = useCallback(() => {
     addToast('Carregamento pausado', 'info');
@@ -244,7 +255,7 @@ function App() {
       <Header
         currentScreen={screen}
         onNavigate={handleNavigate}
-        stationId="SP-001"
+        stationId={stationId}
         userName={user?.name}
       />
 

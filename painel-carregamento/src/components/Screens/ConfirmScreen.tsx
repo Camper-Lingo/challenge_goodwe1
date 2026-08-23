@@ -11,7 +11,7 @@ interface ConfirmScreenProps {
   car: Car;
   targetBattery: number;
   calculation: ChargeCalculation;
-  stationId?: string;
+  stationId: string;
   onBack: () => void;
   onConfirm: () => void;
 }
@@ -20,7 +20,7 @@ export const ConfirmScreen: React.FC<ConfirmScreenProps> = ({
   car,
   targetBattery,
   calculation,
-  stationId = 'SP-001',
+  stationId,
   onBack,
   onConfirm,
 }) => {

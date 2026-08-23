@@ -1,7 +1,7 @@
 // src/components/Layout/Header.tsx
 
 import React from 'react';
-import {Settings, History, LayoutDashboard } from 'lucide-react';
+import { Settings, History, LayoutDashboard } from 'lucide-react';
 import type { Screen } from '../../types';
 
 interface HeaderProps {
@@ -14,12 +14,13 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   currentScreen,
   onNavigate,
-  stationId = 'SP-001',
+  stationId,
   userName,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#1A1A1A]/90 backdrop-blur-md border-b border-[#3A3A3A]">
-      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between relative">
+
         {/* Logo */}
         <button
           onClick={() => onNavigate('dashboard')}
@@ -33,16 +34,24 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-full h-full object-contain"
             />
           </div>
+
           <div className="hidden sm:block">
-            <div className="font-bold text-[#F5F5F5] text-sm leading-tight">EV Station</div>
-            <div className="text-[#A0A0A0] text-xs">Estação {stationId}</div>
-            {userName && (
-              <div className="text-[#00D084] text-xs font-medium mt-0.5">
-                Bem-vindo, {userName}! 👋
-              </div>
-            )}
+            <div className="font-bold text-[#F5F5F5] text-sm leading-tight">
+              EV Station
+            </div>
+
+            <div className="text-[#A0A0A0] text-xs">
+              Estação {stationId}
+            </div>
           </div>
         </button>
+
+        {/* Welcome - centro absoluto da página */}
+        {userName && (
+          <div className="absolute left-1/2 -translate-x-1/2 text-[#00D084] text-sm font-medium whitespace-nowrap">
+            Bem-vindo, {userName}! 👋
+          </div>
+        )}
 
         {/* Nav */}
         <nav className="flex items-center gap-1">
@@ -53,6 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
             active={currentScreen === 'dashboard'}
             onClick={() => onNavigate('dashboard')}
           />
+
           <NavBtn
             id="nav-history"
             icon={<History size={16} />}
@@ -60,6 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
             active={currentScreen === 'history'}
             onClick={() => onNavigate('history')}
           />
+
           <NavBtn
             id="nav-settings"
             icon={<Settings size={16} />}
@@ -69,6 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Configurações"
           />
         </nav>
+
       </div>
     </header>
   );
@@ -83,15 +95,23 @@ interface NavBtnProps {
   title?: string;
 }
 
-const NavBtn: React.FC<NavBtnProps> = ({ id, icon, label, active, onClick, title }) => (
+const NavBtn: React.FC<NavBtnProps> = ({
+  id,
+  icon,
+  label,
+  active,
+  onClick,
+  title,
+}) => (
   <button
     id={id}
     title={title || label}
     onClick={onClick}
     className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-      ${active
-        ? 'bg-[#1E90FF]/20 text-[#1E90FF]'
-        : 'text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-[#2E2E2E]'
+      ${
+        active
+          ? 'bg-[#1E90FF]/20 text-[#1E90FF]'
+          : 'text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-[#2E2E2E]'
       }`}
   >
     {icon}
