@@ -1,7 +1,7 @@
 // src/components/Screens/ChargingScreen.tsx
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Zap, Battery, Clock, Thermometer, Pause, Square, TrendingUp } from 'lucide-react';
+import { Zap, Battery, Clock, Thermometer, Pause, Square, TrendingUp, Flag } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -14,7 +14,7 @@ import type { Car, ChargeSession, ChargeCalculation } from '../../types';
 import { Card } from '../Common/Card';
 import { Button } from '../Common/Button';
 import { CircularProgress } from '../Common/CircularProgress';
-import { formatCurrency, formatTime, formatEnergy } from '../../utils/formatters';
+import { formatCurrency, formatTime, } from '../../utils/formatters';
 
 interface ChargingScreenProps {
   car: Car;
@@ -57,9 +57,6 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
 
   const targetBattery = session.endBattery;
   const totalEnergyNeeded = calculation.energyNeeded;
-  const progressPercent = totalEnergyNeeded > 0
-    ? Math.min(100, (energyDelivered / totalEnergyNeeded) * 100)
-    : 0;
 
   const estimatedTotalSeconds = calculation.estimatedTime * 60;
   const remainingSeconds = Math.max(0, estimatedTotalSeconds - elapsedSeconds);
@@ -179,14 +176,14 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
   const costSoFar = energyDelivered * session.costPerKwh;
 
   return (
-    <div className="space-y-4 animate-[fade-in_0.4s_ease-out]">
+    <div className="space-y-5 animate-[fade-in_0.4s_ease-out]">
       {/* Header */}
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 mb-1">
           <span
             className={`transition-opacity duration-300 ${boltPulse ? 'opacity-100' : 'opacity-40'}`}
           >
-            <Zap size={24} className="text-[#1E90FF]" fill="#1E90FF" />
+            <Zap size={22} className="text-[#1E90FF]" fill="#1E90FF" />
           </span>
           <h2 className="text-xl font-bold text-[#F5F5F5]">
             {paused ? 'Pausado' : 'Carregando...'}
@@ -194,79 +191,75 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
           <span
             className={`transition-opacity duration-300 ${boltPulse ? 'opacity-40' : 'opacity-100'}`}
           >
-            <Zap size={24} className="text-[#1E90FF]" fill="#1E90FF" />
+            <Zap size={22} className="text-[#1E90FF]" fill="#1E90FF" />
           </span>
         </div>
         <p className="text-[#A0A0A0] text-sm">{car.model}</p>
       </div>
 
-      {/* Main progress */}
-      <Card glow="blue" className="flex flex-col items-center py-6">
+      {/* ===== FOCAL POINT: bola gigante com stats orbitando ===== */}
+      <div className="relative w-full aspect-square max-w-[420px] mx-auto flex items-center justify-center">
+        {/* Bateria — canto superior esquerdo */}
+        <OrbitStat
+          className="absolute top-[6%] left-0"
+          align="left"
+          icon={<Battery size={14} className="text-[#1E90FF]" />}
+          label="Bateria"
+          value={`${Math.round(currentBattery)}%`}
+        />
+
+        {/* Custo — canto superior direito */}
+        <OrbitStat
+          className="absolute top-[6%] right-0"
+          align="right"
+          icon={<TrendingUp size={14} className="text-[#00D084]" />}
+          label="Custo"
+          value={formatCurrency(costSoFar)}
+          valueColor="text-[#00D084]"
+        />
+
+        {/* Círculo gigante, sem moldura */}
         <CircularProgress
           percentage={currentBattery}
-          size={180}
-          strokeWidth={14}
+          size={260}
+          strokeWidth={16}
           color="#1E90FF"
           animate
         />
-        <div className="mt-4 w-full">
-          <div className="flex justify-between text-xs text-[#6A6A6A] mono mb-1">
-            <span>{session.startBattery}% inicio</span>
-            <span>{targetBattery}% destino</span>
-          </div>
-          <div className="h-2 bg-[#3A3A3A] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[#1E90FF] to-[#00D084] rounded-full transition-all duration-1000"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div className="text-center mt-1 text-xs text-[#A0A0A0]">
-            {Math.round(progressPercent)}% completo
-          </div>
-        </div>
-      </Card>
 
-      {/* Live stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <LiveStat
-          icon={<Battery size={16} className="text-[#1E90FF]" />}
-          label="Energia entregue"
-          value={formatEnergy(energyDelivered)}
-          sub={`de ${formatEnergy(totalEnergyNeeded)}`}
+        {/* Início — canto inferior esquerdo */}
+        <OrbitStat
+          className="absolute bottom-[6%] left-0"
+          align="left"
+          icon={<Flag size={14} className="text-[#A0A0A0]" />}
+          label="Início"
+          value={`${session.startBattery}%`}
         />
-        <LiveStat
-          icon={<Clock size={16} className="text-amber-400" />}
-          label="Tempo restante"
+
+        {/* Tempo — canto inferior direito */}
+        <OrbitStat
+          className="absolute bottom-[6%] right-0"
+          align="right"
+          icon={<Clock size={14} className="text-amber-400" />}
+          label="Tempo"
           value={formatTime(Math.round(remainingSeconds / 60))}
-          sub={`${Math.floor(elapsedSeconds / 60)}min decorridos`}
-        />
-        <LiveStat
-          icon={<Zap size={16} className="text-[#00D084]" />}
-          label="Potência atual"
-          value={`${Math.round(currentPower)} kW`}
-          sub="velocidade"
-          highlight
-        />
-        <LiveStat
-          icon={<Thermometer size={16} className="text-[#FF6B35]" />}
-          label="Temperatura"
-          value={`${temperature.toFixed(1)}°C`}
-          sub="bateria"
         />
       </div>
 
-      {/* Cost */}
-      <Card glow="green">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#00D084]" />
-            <span className="text-sm text-[#A0A0A0]">Custo acumulado</span>
-          </div>
-          <div className="mono text-2xl font-bold text-[#00D084]">
-            {formatCurrency(costSoFar)}
-          </div>
-        </div>
-      </Card>
+      {/* Potência + Temperatura — linha discreta logo abaixo do foco */}
+      <div className="grid grid-cols-2 gap-3 max-w-[420px] mx-auto">
+        <LiveStat
+          icon={<Zap size={15} className="text-[#00D084]" />}
+          label="Potência atual"
+          value={`${Math.round(currentPower)} kW`}
+          highlight
+        />
+        <LiveStat
+          icon={<Thermometer size={15} className="text-[#FF6B35]" />}
+          label="Temperatura"
+          value={`${temperature.toFixed(1)}°C`}
+        />
+      </div>
 
       {/* Power chart */}
       <Card>
@@ -342,6 +335,29 @@ export const ChargingScreen: React.FC<ChargingScreenProps> = ({
     </div>
   );
 };
+
+/**
+ * Stat "orbitando" ao redor do círculo grande — sem card, sem borda.
+ * Apenas ícone + label + valor, alinhado à esquerda ou direita.
+ */
+const OrbitStat: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  align: 'left' | 'right';
+  valueColor?: string;
+  className?: string;
+}> = ({ icon, label, value, align, valueColor = 'text-[#F5F5F5]', className = '' }) => (
+  <div
+    className={`flex flex-col gap-0.5 ${align === 'right' ? 'items-end text-right' : 'items-start text-left'} ${className}`}
+  >
+    <div className={`flex items-center gap-1.5 ${align === 'right' ? 'flex-row-reverse' : ''}`}>
+      {icon}
+      <span className="text-[11px] uppercase tracking-wide text-[#6A6A6A]">{label}</span>
+    </div>
+    <span className={`mono font-bold text-lg leading-none ${valueColor}`}>{value}</span>
+  </div>
+);
 
 const LiveStat: React.FC<{
   icon: React.ReactNode;
