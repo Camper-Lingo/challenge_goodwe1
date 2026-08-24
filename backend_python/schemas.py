@@ -14,3 +14,14 @@ class ChargeSessionCreate(BaseModel):
     ended_at: datetime
     duration_minutes: int
     status: str
+
+class CustomerCreate(BaseModel):
+    first_name: str
+    last_name: str
+
+class VehicleCreate(BaseModel):
+    customer_id: int
+    model: str
+    plate: str
+    battery_capacity_kwh: float
+    max_power_kw: float

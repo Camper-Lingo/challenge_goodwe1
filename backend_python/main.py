@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from database import get_connection
-from schemas import ChargeSessionCreate
+from schemas import ChargeSessionCreate, CustomerCreate, VehicleCreate
 
 app = FastAPI(title="GoodWe Charging API")
 
@@ -51,34 +51,59 @@ def create_session(session: ChargeSessionCreate):
         conn.close()
 
 
-@app.get("/api/customers/{customer_id}/history")
-def get_customer_history(customer_id: int):
+@app.post("/api/customers", status_code=201)
+def create_customer(customer: CustomerCreate):
     conn = get_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute(
-            """
-            SELECT
-                cs.id AS session_id,
-                c.first_name, c.last_name,
-                v.model, v.plate,
-                cs.energy_used_kwh, cs.total_cost, cs.duration_minutes,
-                s.code AS station_code, cs.started_at, cs.status
-            FROM charge_sessions cs
-            JOIN customers c ON c.id = cs.customer_id
-            JOIN vehicles v  ON v.id = cs.vehicle_id
-            JOIN stations s  ON s.id = cs.station_id
-            WHERE cs.customer_id = %s
-            ORDER BY cs.started_at DESC
-            """,
-            (customer_id,)
+            "INSERT INTO customers (first_name, last_name) VALUES (%s, %s) RETURNING id",
+            (customer.first_name, customer.last_name)
         )
-        resultados = cursor.fetchall()
-        return resultados
+        novo_id = cursor.fetchone()["id"]
+        conn.commit()
+        return {"customer_id": novo_id}
 
     except Exception as erro:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar histórico: {erro}")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao criar cliente: {erro}")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.post("/api/vehicles", status_code=201)
+def create_vehicle(vehicle: VehicleCreate):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            "INSERT INTO vehicles (customer_id, model, plate, battery_capacity_kwh, max_power_kw) VALUES (%s,%s,%s,%s,%s) RETURNING id",
+            (vehicle.customer_id, vehicle.model, vehicle.plate, vehicle.battery_capacity_kwh, vehicle.max_power_kw)
+
+        )
+        novo_id = cursor.fetchone()["id"]
+        conn.commit()
+        return {"vehicle_id": novo_id}
+    except Exception as erro:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao criar veiculo: {erro}")
+    
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.get("/api/stations")
+def list_stations():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT id, code, max_power_kw, status FROM stations WHERE status = 'active'")
+        resultados = cursor.fetchall()
+        return resultados
 
     finally:
         cursor.close()
