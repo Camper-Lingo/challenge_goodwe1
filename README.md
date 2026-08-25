@@ -26,10 +26,10 @@ Esse projeto nasceu como um exercício de aprendizado full stack — a ideia foi
 
 ## 🖼️ Prévia
 
-![Print](painel-carregamento/public/print1.png)
-![Print](painel-carregamento/public/print2.png)
-![Print](painel-carregamento/public/print3.png)
-![Print](painel-carregamento/public/print4.png)
+![Print](painel-carregamento/public/Print1.png)
+![Print](painel-carregamento/public/Print2.png)
+![Print](painel-carregamento/public/Print3.png)
+![Print](painel-carregamento/public/Print4.png)
 
 
 
