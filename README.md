@@ -26,10 +26,10 @@ Esse projeto nasceu como um exercício de aprendizado full stack — a ideia foi
 
 ## 🖼️ Prévia
 
-<img src="public/Print1.png" width="700">
-<img src="public/Print2.png" width="700">
-<img src="public/Print3.png" width="700">
-<img src="public/Print4.png" width="700">
+![Print](public/print1.png)
+![Print](public/print2.png)
+![Print](public/print3.png)
+![Print](public/print4.png)
 
 
 
