@@ -150,7 +150,7 @@ O app vai rodar em `http://localhost:5173`.
 - `POST /api/vehicles` — cria um veículo vinculado a um cliente
 - `GET /api/stations` — lista as estações disponíveis
 - `POST /api/sessions` — grava uma sessão de carregamento completa
-- `GET /api/customers/{id}/history` — busca o histórico de um cliente
+
 
 ---
 
