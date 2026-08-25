@@ -1,8 +1,16 @@
 from fastapi import FastAPI, HTTPException
 from database import get_connection
 from schemas import ChargeSessionCreate, CustomerCreate, VehicleCreate
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="GoodWe Charging API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/api/test")
 def test_connection():
