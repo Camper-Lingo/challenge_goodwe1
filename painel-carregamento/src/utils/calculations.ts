@@ -37,3 +37,63 @@ export const calculateCharge = (
     systemLoss,
   };
 };
+export const calculateChargeReal = async (
+  currentBattery: number,
+  targetBattery: number,
+  batteryCapacity: number,
+  maxPower: number,
+  systemLoss: number = 5
+): Promise<ChargeCalculation> => {
+  const delta = targetBattery - currentBattery;
+
+  if (delta <= 0) {
+    return {
+      energyNeeded: 0,
+      totalCostRaw: 0,
+      totalCostWithLoss: 0,
+      estimatedTime: 0,
+      powerAvailable: Math.round(maxPower * 0.95),
+      systemLoss,
+    };
+  }
+
+  // Energia necessária para atingir a porcentagem desejada
+  const energyNeeded = (batteryCapacity * delta) / 100;
+
+  // Perdas do sistema
+  const losses = energyNeeded * (systemLoss / 100);
+
+  // Energia que realmente precisa ser fornecida
+  const totalEnergy = energyNeeded + losses;
+
+  // Chama o backend Python
+  const response = await fetch(
+    'http://localhost:8000/api/charging/calculate',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        energy_needed_kwh: totalEnergy,
+        power_kw: maxPower,
+        start_time: new Date().toISOString(),
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao calcular carregamento no servidor');
+  }
+
+  const data = await response.json();
+
+  return {
+    energyNeeded: data.energia_total_kwh,
+    totalCostRaw: data.custo_total,
+    totalCostWithLoss: data.custo_total,
+    estimatedTime: Math.max(1, data.tempo_minutos),
+    powerAvailable: Math.round(maxPower * 0.95),
+    systemLoss,
+  };
+};

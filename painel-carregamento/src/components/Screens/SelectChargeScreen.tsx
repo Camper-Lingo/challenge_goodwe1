@@ -1,11 +1,11 @@
 // src/components/Screens/SelectChargeScreen.tsx
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Zap, Battery, Clock, DollarSign } from 'lucide-react';
 import type { Car, Tariff, ChargeCalculation } from '../../types';
 import { Card } from '../Common/Card';
 import { Button } from '../Common/Button';
-import { calculateCharge } from '../../utils/calculations';
+import { calculateChargeReal } from '../../utils/calculations';
 import { formatCurrency, formatTime, formatEnergy } from '../../utils/formatters';
 
 interface SelectChargeScreenProps {
@@ -34,17 +34,45 @@ export const SelectChargeScreen: React.FC<SelectChargeScreenProps> = ({
   const [customInput, setCustomInput] = useState('');
   const [inputError, setInputError] = useState('');
 
-  const calculation = useMemo<ChargeCalculation>(
-    () =>
-      calculateCharge(
+const [calculation, setCalculation] = useState<ChargeCalculation>({
+  energyNeeded: 0,
+  totalCostRaw: 0,
+  totalCostWithLoss: 0,
+  estimatedTime: 0,
+  powerAvailable: Math.round(car.maxPower * 0.95),
+  systemLoss: 5,
+});
+
+const [isCalculating, setIsCalculating] = useState(false);
+
+useEffect(() => {
+  const calculate = async () => {
+    const delta = target - car.currentCharge;
+
+    if (delta <= 0) {
+      return;
+    }
+
+    setIsCalculating(true);
+
+    try {
+      const result = await calculateChargeReal(
         car.currentCharge,
         target,
         car.batteryCapacity,
-        tariff.currentRate,
         car.maxPower
-      ),
-    [target, car, tariff.currentRate]
-  );
+      );
+
+      setCalculation(result);
+    } catch (error) {
+      console.error('Erro ao calcular carregamento:', error);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  calculate();
+}, [target, car.currentCharge, car.batteryCapacity, car.maxPower]);
 
   const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);

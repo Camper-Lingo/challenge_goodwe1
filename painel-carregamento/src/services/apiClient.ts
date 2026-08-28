@@ -67,3 +67,29 @@ export const saveChargeSession = async (session: {
   return response.json();
 };
 
+export async function calculateCharging(
+  budget: number,
+  powerKw: number,
+  startTime: string
+) {
+  const response = await fetch(
+    'http://localhost:8000/api/charging/calculate',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        budget,
+        power_kw: powerKw,
+        start_time: startTime,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Erro ao calcular carregamento');
+  }
+
+  return response.json();
+}

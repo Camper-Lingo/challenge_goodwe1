@@ -25,3 +25,8 @@ class VehicleCreate(BaseModel):
     plate: str
     battery_capacity_kwh: float
     max_power_kw: float
+
+class ChargingCalculationRequest(BaseModel):
+    energy_needed_kwh: float
+    power_kw: float
+    start_time: datetime

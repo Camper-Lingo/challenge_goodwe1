@@ -55,19 +55,45 @@ function pickRandomCarSpecs() {
   };
 }
 
-const DEFAULT_TARIFF: Tariff = {
-  currentRate: 0.8,
-  peakHours: ['18:00', '22:00'],
-  offPeakRate: 0.6,
-  peakRate: 1.2,
-  lastUpdated: new Date().toISOString(),
-};
+function App() {
+  const [tariff, setTariff] = useState<Tariff>({
+  currentRate: 0,
+  peakHours: [],
+  offPeakRate: 0,
+  peakRate: 0,
+  lastUpdated: '',
+});
+
+useEffect(() => {
+  const fetchTariff = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/tariff');
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar tarifa');
+      }
+
+      const data = await response.json();
+
+      setTariff({
+        currentRate: data.rate,
+        peakHours: [],
+        offPeakRate: 0,
+        peakRate: data.rate,
+        lastUpdated: data.current_time,
+      });
+
+    } catch (error) {
+      console.error('Erro ao carregar tarifa:', error);
+    }
+  };
+
+  fetchTariff();
+}, []);
 
 function generateId() {
   return `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
-
-function App() {
   const {
     car,
     user,
@@ -242,7 +268,7 @@ function App() {
       startBattery: car.currentCharge,
       endBattery: chargeTarget,
       energyUsed: chargeCalc.energyNeeded,
-      costPerKwh: DEFAULT_TARIFF.currentRate,
+      costPerKwh: tariff.currentRate,
       totalCost: chargeCalc.totalCostRaw,
       duration: chargeCalc.estimatedTime,
       status: 'charging',
@@ -253,7 +279,7 @@ function App() {
     setActiveSession(session);
     setScreen('charging');
     addToast('Carregamento iniciado!', 'success');
-  }, [car, chargeCalc, chargeTarget, startSession, addToast, station]);
+  }, [car, chargeCalc, chargeTarget, tariff, startSession, addToast, station]);
 
   const handleChargingPause = useCallback(() => {
     addToast('Carregamento pausado', 'info');
@@ -342,7 +368,7 @@ function App() {
         {screen === 'dashboard' && (
           <DashboardScreen
             car={car}
-            tariff={DEFAULT_TARIFF}
+            tariff={tariff}
             onChargeClick={handleChargeClick}
             onHistoryClick={() => setScreen('history')}
             onConnectCar={handleConnectCar}
@@ -352,7 +378,7 @@ function App() {
         {screen === 'select' && car && (
           <SelectChargeScreen
             car={car}
-            tariff={DEFAULT_TARIFF}
+            tariff={tariff}
             onBack={() => setScreen('dashboard')}
             onContinue={handleSelectContinue}
           />

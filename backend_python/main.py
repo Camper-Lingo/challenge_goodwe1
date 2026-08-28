@@ -1,9 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from database import get_connection
-from schemas import ChargeSessionCreate, CustomerCreate, VehicleCreate
+from schemas import ChargeSessionCreate, CustomerCreate, VehicleCreate,ChargingCalculationRequest
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+from tariff import (
+    obter_info_tarifa,
+    calcular_carga_por_energia
+)
+
 
 app = FastAPI(title="GoodWe Charging API")
+
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -11,6 +19,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/api/tariff")
+def get_current_tariff():
+
+    agora = datetime.now()
+
+    taxa, proxima_mudanca, nome = obter_info_tarifa(agora)
+
+    return {
+        "rate": taxa,
+        "name": nome,
+        "current_time": agora.isoformat(),
+        "next_change": proxima_mudanca.isoformat()
+    }
 
 @app.get("/api/test")
 def test_connection():
@@ -116,3 +137,14 @@ def list_stations():
     finally:
         cursor.close()
         conn.close()
+
+@app.post("/api/charging/calculate")
+def calculate_charging(data: ChargingCalculationRequest):
+
+    resultado = calcular_carga_por_energia(
+        data.energy_needed_kwh,
+        data.power_kw,
+        data.start_time
+    )
+
+    return resultado
