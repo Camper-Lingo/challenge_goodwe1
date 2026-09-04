@@ -52,7 +52,7 @@ export interface ChargeCalculation {
   systemLoss: number;
 }
 
-export type Screen = 'dashboard' | 'select' | 'confirm' | 'charging' | 'history';
+export type Screen = 'dashboard' | 'select' | 'confirm' | 'charging' | 'history'| 'admin';
 
 export interface ToastData {
   id: string;

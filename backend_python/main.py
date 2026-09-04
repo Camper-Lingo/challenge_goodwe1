@@ -148,3 +148,104 @@ def calculate_charging(data: ChargingCalculationRequest):
     )
 
     return resultado
+
+@app.get("/api/admin/customers")
+def admin_customers():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT
+                id,
+                first_name,
+                last_name
+            FROM customers
+            ORDER BY id DESC
+        """)
+
+        return cursor.fetchall()
+
+    except Exception as erro:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao buscar clientes: {erro}"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.get("/api/admin/vehicles")
+def admin_vehicles():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT
+                v.id,
+                v.customer_id,
+                v.model,
+                v.plate,
+                v.battery_capacity_kwh,
+                v.max_power_kw
+            FROM vehicles v
+            ORDER BY v.id DESC
+        """)
+
+        return cursor.fetchall()
+
+    except Exception as erro:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao buscar veículos: {erro}"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.get("/api/admin/sessions")
+def admin_sessions():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT
+                cs.id,
+                c.first_name,
+                c.last_name,
+                v.model,
+                v.plate,
+                s.code AS station_code,
+                cs.start_battery_pct,
+                cs.end_battery_pct,
+                cs.energy_used_kwh,
+                cs.cost_per_kwh,
+                cs.total_cost,
+                cs.started_at,
+                cs.ended_at,
+                cs.duration_minutes,
+                cs.status
+            FROM charge_sessions cs
+            JOIN customers c ON c.id = cs.customer_id
+            JOIN vehicles v ON v.id = cs.vehicle_id
+            JOIN stations s ON s.id = cs.station_id
+            ORDER BY cs.started_at DESC
+        """)
+
+        return cursor.fetchall()
+
+    except Exception as erro:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao buscar sessões: {erro}"
+        )
+
+    finally:
+        cursor.close()
+        conn.close()

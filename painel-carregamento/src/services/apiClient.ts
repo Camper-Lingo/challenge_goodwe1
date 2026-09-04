@@ -93,3 +93,65 @@ export async function calculateCharging(
 
   return response.json();
 }
+export interface AdminCustomer {
+  id: number;
+  first_name: string;
+  last_name: string;
+}
+
+export interface AdminVehicle {
+  id: number;
+  customer_id: number;
+  model: string;
+  plate: string;
+  battery_capacity_kwh: number;
+  max_power_kw: number;
+}
+
+export interface AdminSession {
+  id: number;
+  first_name: string;
+  last_name: string;
+  model: string;
+  plate: string;
+  station_code: string;
+  start_battery_pct: number;
+  end_battery_pct: number;
+  energy_used_kwh: number;
+  cost_per_kwh: number;
+  total_cost: number;
+  started_at: string;
+  ended_at: string;
+  duration_minutes: number;
+  status: string;
+}
+
+export const getAdminCustomers = async (): Promise<AdminCustomer[]> => {
+  const response = await fetch(`${API_URL}/api/admin/customers`);
+
+  if (!response.ok) {
+    throw new Error('Falha ao buscar clientes');
+  }
+
+  return response.json();
+};
+
+export const getAdminVehicles = async (): Promise<AdminVehicle[]> => {
+  const response = await fetch(`${API_URL}/api/admin/vehicles`);
+
+  if (!response.ok) {
+    throw new Error('Falha ao buscar veículos');
+  }
+
+  return response.json();
+};
+
+export const getAdminSessions = async (): Promise<AdminSession[]> => {
+  const response = await fetch(`${API_URL}/api/admin/sessions`);
+
+  if (!response.ok) {
+    throw new Error('Falha ao buscar sessões');
+  }
+
+  return response.json();
+};

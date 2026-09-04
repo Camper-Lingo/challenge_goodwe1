@@ -5,6 +5,8 @@ import { Header } from './components/Layout/Header';
 import { DashboardScreen } from './components/Screens/DashboardScreen';
 import { SelectChargeScreen } from './components/Screens/SelectChargeScreen';
 import { ConfirmScreen } from './components/Screens/ConfirmScreen';
+import { AdminScreen } from './components/Screens/AdminScreen';
+import { AdminLogin } from './components/Screens/AdminLogin';
 import { ChargingScreen } from './components/Screens/ChargingScreen';
 import { HistoryScreen } from './components/Screens/HistoryScreen';
 import { SplashScreen } from './components/Screens/SplashScreen';
@@ -111,6 +113,7 @@ function generateId() {
   type AppPhase = 'splash' | 'welcome' | 'app';
   const [appPhase, setAppPhase] = useState<AppPhase>('splash');
   const [screen, setScreen] = useState<Screen>('dashboard');
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [chargeTarget, setChargeTarget] = useState(80);
   const [chargeCalc, setChargeCalc] = useState<ChargeCalculation | null>(null);
   const [activeSession, setActiveSession] = useState<ChargeSession | null>(currentSession);
@@ -412,6 +415,18 @@ function generateId() {
             onClearHistory={clearAllHistory}
             onBack={() => setScreen('dashboard')}
           />
+        )}
+        {screen === 'admin' && (
+          adminAuthenticated ? (
+            <AdminScreen
+              onBack={() => setScreen('dashboard')}
+            />
+          ) : (
+            <AdminLogin
+              onSuccess={() => setAdminAuthenticated(true)}
+              onBack={() => setScreen('dashboard')}
+            />  
+          )  
         )}
       </main>
 

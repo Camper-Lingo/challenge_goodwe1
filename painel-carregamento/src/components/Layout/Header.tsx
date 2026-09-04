@@ -1,8 +1,9 @@
 // src/components/Layout/Header.tsx
 
 import React from 'react';
-import { Settings, History, LayoutDashboard } from 'lucide-react';
+import { Settings, History, LayoutDashboard,Shield } from 'lucide-react';
 import type { Screen } from '../../types';
+
 
 interface HeaderProps {
   currentScreen: Screen;
@@ -69,6 +70,13 @@ export const Header: React.FC<HeaderProps> = ({
             label="Histórico"
             active={currentScreen === 'history'}
             onClick={() => onNavigate('history')}
+          />
+          <NavBtn
+            id="nav-admin"
+            icon={<Shield size={16} />}
+            label="Admin"
+            active={currentScreen === 'admin'}
+            onClick={() => onNavigate('admin')}
           />
 
           <NavBtn
